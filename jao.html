@@ -1,0 +1,1094 @@
+
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Čisto Sarajevo | Gradski portal</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+:root {
+    --green: #147347;
+    --dark: #103e2b;
+    --light: #e9f6ee;
+    --bg: #f5f8f6;
+    --text: #20352b;
+    --muted: #758278;
+    --border: #e4ebe6;
+    --red: #dc4949;
+    --orange: #e9a12b;
+    --blue: #3878d4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+header {
+    background: linear-gradient(120deg, #103e2b, #188050);
+    color: white;
+    padding: 18px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.brand {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+}
+
+.brand span { color: #a9f0c1; }
+
+.subtitle {
+    font-size: 12px;
+    color: #d4eadd;
+    margin-top: 4px;
+}
+
+.nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 13px;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: background .2s;
+}
+
+.nav a:hover { background: #ffffff20; }
+
+.hero {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 35px 5%;
+}
+
+.hero-inner {
+    max-width: 1450px;
+    margin: auto;
+}
+
+.hero h1 {
+    font-size: clamp(26px, 3vw, 36px);
+    letter-spacing: -1px;
+    margin: 0 0 10px;
+    color: var(--dark);
+}
+
+.hero p {
+    max-width: 720px;
+    line-height: 1.8;
+    color: var(--muted);
+    margin: 0;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1450px;
+    margin: auto;
+    padding: 27px 5%;
+}
+
+.section-title {
+    font-size: 19px;
+    margin: 0 0 17px;
+    color: var(--dark);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.stat {
+    background: white;
+    padding: 21px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    box-shadow: 0 4px 18px #173d2610;
+    border-top: 3px solid var(--green);
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-top: 9px;
+    color: var(--dark);
+}
+
+.stat-icon {
+    font-size: 21px;
+    margin-bottom: 12px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(310px, 1fr);
+    gap: 21px;
+    align-items: start;
+}
+
+.panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 21px;
+    margin-bottom: 21px;
+    box-shadow: 0 4px 18px #173d2609;
+    min-width: 0;
+}
+
+.panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.panel-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--dark);
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+#map {
+    height: 470px;
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    z-index: 1;
+    background: #eaf0ec;
+}
+
+.legend {
+    display: flex;
+    gap: 13px;
+    flex-wrap: wrap;
+    margin: 17px 0;
+    font-size: 12px;
+    color: #526359;
+}
+
+.dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.green { background: #24975b; }
+.orange { background: var(--orange); }
+.red { background: var(--red); }
+.blue { background: var(--blue); }
+
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #354c3e;
+    margin: 15px 0 7px;
+}
+
+input, select, textarea {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dce6df;
+    background: #fbfdfb;
+    color: var(--text);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border .2s, box-shadow .2s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #389667;
+    box-shadow: 0 0 0 3px #25945b17;
+    background: white;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+button {
+    border: 1px solid transparent;
+    border-radius: 9px;
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+}
+
+button:active { transform: scale(.98); }
+
+.primary {
+    color: white;
+    background: var(--green);
+}
+
+.primary:hover { background: #105b37; }
+
+.secondary {
+    color: var(--green);
+    background: var(--light);
+    border-color: #d7ebde;
+}
+
+.secondary:hover { background: #d8eddf; }
+
+.danger {
+    color: #b82f2f;
+    background: #fff0ef;
+    border-color: #f5d8d6;
+}
+
+.full {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.container-item, .report-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #edf1ed;
+}
+
+.container-item:last-child, .report-item:last-child {
+    border-bottom: none;
+}
+
+.item-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.item-title {
+    font-size: 14px;
+    font-weight: 750;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.item-desc {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+
+.pill {
+    display: inline-block;
+    flex-shrink: 0;
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 30px;
+}
+
+.pill-green { background: #e4f5e9; color: #197044; }
+.pill-orange { background: #fff2d9; color: #95600a; }
+.pill-red { background: #ffebeb; color: #b72e2e; }
+.pill-blue { background: #eaf1ff; color: #285caf; }
+.pill-grey { background: #edf0ee; color: #58645c; }
+
+.actions {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 11px;
+}
+
+.actions button {
+    padding: 8px 10px;
+    font-size: 11px;
+}
+
+.empty {
+    text-align: center;
+    color: #89968d;
+    padding: 25px 8px;
+    font-size: 13px;
+}
+
+.form-note {
+    background: #f0f8f2;
+    color: #42654e;
+    border-radius: 9px;
+    padding: 11px;
+    margin-top: 13px;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+footer {
+    background: white;
+    border-top: 1px solid var(--border);
+    padding: 24px 5%;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 2;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 11px;
+}
+
+.leaflet-popup-content {
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.8;
+}
+
+.leaflet-popup-content button {
+    margin-top: 5px;
+}
+
+@media(max-width: 1000px) {
+    .container { padding: 23px; }
+    .layout { grid-template-columns: 1fr; }
+}
+
+@media(max-width: 650px) {
+    header { padding: 17px 20px; }
+    .brand { font-size: 23px; }
+    .hero { padding: 25px 20px; }
+    .container { padding: 16px; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .stat { padding: 15px; }
+    .stat-value { font-size: 27px; }
+    .panel { padding: 15px; }
+    #map { height: 360px; }
+    .nav { gap: 2px; }
+    .nav a { padding: 8px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <div class="brand">🌿 Čisto <span>Sarajevo</span></div>
+        <div class="subtitle">Digitalna platforma za čistiji grad</div>
+    </div>
+
+    <nav class="nav">
+        <a href="#pocetna">Početna</a>
+        <a href="#mapa">Mapa</a>
+        <a href="#kontejneri">Kontejneri</a>
+        <a href="#prijave">Prijave</a>
+    </nav>
+</header>
+
+<section class="hero" id="pocetna">
+    <div class="hero-inner">
+        <h1>Zajedno za čistije Sarajevo. 🌱</h1>
+        <p>
+            Prati stanje kontejnera, prijavi komunalne probleme
+            i doprinesi ljepšem i uređenijem gradu. Sve informacije
+            dostupne su na jednom mjestu.
+        </p>
+    </div>
+</section>
+
+<main class="container">
+
+    <h2 class="section-title">Pregled stanja</h2>
+
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-icon">🗑️</div>
+            <div class="stat-label">Ukupno kontejnera</div>
+            <div class="stat-value" id="total">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">🔴</div>
+            <div class="stat-label">Puni kontejneri</div>
+            <div class="stat-value" id="fullCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">📋</div>
+            <div class="stat-label">Aktivne prijave</div>
+            <div class="stat-value" id="activeCount">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Riješeni problemi</div>
+            <div class="stat-value" id="solvedCount">0</div>
+        </div>
+    </section>
+
+    <section class="layout">
+
+        <div>
+            <div class="panel" id="mapa">
+                <div class="panel-heading">
+                    <h2>🗺️ Interaktivna mapa</h2>
+                    <span class="pill pill-green">SARAJEVO</span>
+                </div>
+
+                <p class="muted">
+                    Klikni na oznaku za detalje ili na mapu
+                    da izabereš lokaciju nove prijave.
+                </p>
+
+                <div class="legend">
+                    <span><i class="dot green"></i>Prazan</span>
+                    <span><i class="dot orange"></i>Polupun</span>
+                    <span><i class="dot red"></i>Pun</span>
+                    <span><i class="dot blue"></i>Prijava problema</span>
+                </div>
+
+                <div id="map"></div>
+
+                <button class="secondary full" onclick="locateMe()">
+                    📍 Pronađi moju lokaciju
+                </button>
+
+                <div class="form-note">
+                    Početne oznake su demonstracijske lokacije,
+                    a ne potvrđena evidencija gradskih kontejnera.
+                </div>
+            </div>
+
+            <div class="panel" id="kontejneri">
+                <div class="panel-heading">
+                    <h2>🗑️ Evidencija kontejnera</h2>
+                </div>
+
+                <p class="muted">
+                    Ažuriraj stanje kontejnera i prati promjene na mapi.
+                </p>
+
+                <div id="containerList"></div>
+
+                <hr style="border:0;border-top:1px solid #edf1ed;margin:18px 0">
+
+                <h3 style="font-size:15px">Dodaj kontejner</h3>
+
+                <form id="containerForm">
+                    <label for="containerName">Naziv lokacije</label>
+                    <input id="containerName" required
+                        placeholder="Npr. Dolac Malta">
+
+                    <label for="containerAddress">Adresa</label>
+                    <input id="containerAddress" required
+                        placeholder="Ulica ili naselje">
+
+                    <label for="containerStatus">Početno stanje</label>
+                    <select id="containerStatus">
+                        <option>Prazan</option>
+                        <option>Polupun</option>
+                        <option>Pun</option>
+                    </select>
+
+                    <p class="muted">
+                        Za novu oznaku prvo klikni na željenu lokaciju na mapi.
+                    </p>
+
+                    <button class="primary full" type="submit">
+                        + Dodaj kontejner na mapu
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div>
+            <div class="panel" id="prijave">
+                <div class="panel-heading">
+                    <h2>📝 Prijavi problem</h2>
+                </div>
+
+                <p class="muted">
+                    Opiši problem i označi njegovu lokaciju na mapi.
+                </p>
+
+                <form id="reportForm">
+                    <label for="category">Vrsta problema</label>
+                    <select id="category" required>
+                        <option value="Puna kanta / kontejner">Puna kanta / kontejner</option>
+                        <option value="Divlja deponija">Divlja deponija</option>
+                        <option value="Vodovod">Vodovod / puknuta cijev</option>
+                        <option value="Kanalizacija">Kanalizacija</option>
+                        <option value="Javna rasvjeta">Javna rasvjeta</option>
+                        <option value="Oštećen put">Oštećen put / rupa</option>
+                        <option value="Nered i smeće">Nered i smeće na ulici</option>
+                        <option value="Ostalo">Ostalo</option>
+                    </select>
+
+                    <label for="location">Adresa ili lokacija</label>
+                    <input id="location" required
+                        placeholder="Npr. Alipašino Polje">
+
+                    <label for="description">Opis problema</label>
+                    <textarea id="description" required
+                        placeholder="Detaljno opiši problem..."></textarea>
+
+                    <label for="reporter">Ime prijavitelja (opcionalno)</label>
+                    <input id="reporter" placeholder="Ime i prezime">
+
+                    <label>Odabrana lokacija</label>
+                    <div class="form-note" id="coordinates">
+                        Nije odabrana. Klikni na mapu lijevo.
+                    </div>
+
+                    <button class="primary full" type="submit">
+                        📩 Pošalji prijavu
+                    </button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h2>📋 Pregled prijava</h2>
+                </div>
+
+                <input id="search" placeholder="🔎 Pretraži probleme..."
+                    style="margin-bottom:12px">
+
+                <select id="filter">
+                    <option value="all">Sve prijave</option>
+                    <option value="active">Aktivne prijave</option>
+                    <option value="solved">Riješene prijave</option>
+                </select>
+
+                <div id="reportList"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <strong>🌿 Čisto Sarajevo</strong><br>
+    Školski projekat za čistiji, zdraviji i uređeniji grad.<br>
+    Podaci se čuvaju lokalno u ovom pregledniku.
+    Ova demonstracija ne šalje prijave nadležnim službama.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+"use strict";
+
+// MAPA
+const map = L.map("map").setView([43.8563, 18.4131], 13);
+
+L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri"
+    }
+).addTo(map);
+
+// POČETNI DEMONSTRACIJSKI PODACI
+const initialContainers = [
+    {id:1,name:"Centar Sarajeva",address:"Maršala Tita",lat:43.8580,lng:18.4210,status:"Prazan"},
+    {id:2,name:"Baščaršija",address:"Baščaršija",lat:43.8595,lng:18.4310,status:"Polupun"},
+    {id:3,name:"Marijin Dvor",address:"Marijin Dvor",lat:43.8560,lng:18.4070,status:"Pun"},
+    {id:4,name:"Grbavica",address:"Grbavica",lat:43.8505,lng:18.3900,status:"Polupun"},
+    {id:5,name:"Otoka",address:"Otoka",lat:43.8490,lng:18.3560,status:"Prazan"},
+    {id:6,name:"Alipašino Polje",address:"Alipašino Polje",lat:43.8370,lng:18.3440,status:"Pun"},
+    {id:7,name:"Koševo",address:"Koševo",lat:43.8710,lng:18.4140,status:"Prazan"},
+    {id:8,name:"Skenderija",address:"Skenderija",lat:43.8520,lng:18.4190,status:"Polupun"}
+];
+
+function loadData(key, fallback) {
+    try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+
+let containers = loadData("cistoV3Containers", initialContainers);
+
+let reports = loadData("cistoV3Reports", [
+    {
+        id:101,
+        category:"Divlja deponija",
+        location:"Ilidža",
+        description:"Demonstracijska prijava otpada pored puta.",
+        reporter:"Građanin",
+        lat:43.8290,
+        lng:18.3030,
+        solved:false,
+        date:"Primjer"
+    },
+    {
+        id:102,
+        category:"Javna rasvjeta",
+        location:"Novo Sarajevo",
+        description:"Demonstracijska prijava neispravne ulične rasvjete.",
+        reporter:"Građanin",
+        lat:43.8480,
+        lng:18.3850,
+        solved:true,
+        date:"Primjer"
+    }
+]);
+
+let nextId = Math.max(
+    0,
+    ...containers.map(x => Number(x.id) || 0),
+    ...reports.map(x => Number(x.id) || 0)
+) + 1;
+
+let selectedLocation = null;
+const markers = {};
+let userMarker = null;
+let draftMarker = null;
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+    })[ch]);
+}
+
+function saveData() {
+    try {
+        localStorage.setItem("cistoV3Containers", JSON.stringify(containers));
+        localStorage.setItem("cistoV3Reports", JSON.stringify(reports));
+    } catch (e) {
+        alert("Preglednik nije mogao sačuvati podatke.");
+    }
+}
+
+function statusColor(status) {
+    if (status === "Pun") return "#dc4949";
+    if (status === "Polupun") return "#e9a12b";
+    return "#24975b";
+}
+
+function statusClass(status) {
+    if (status === "Pun") return "pill-red";
+    if (status === "Polupun") return "pill-orange";
+    return "pill-green";
+}
+
+function makeIcon(color) {
+    return L.divIcon({
+        className: "",
+        html: `<div style="
+            width:25px;height:25px;
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            background:${color};
+            border:3px solid white;
+            box-shadow:0 2px 7px #0004">
+            <div style="width:7px;height:7px;
+            background:white;border-radius:50%;margin:6px"></div>
+        </div>`,
+        iconSize:[25,25],
+        iconAnchor:[12,25],
+        popupAnchor:[0,-24]
+    });
+}
+
+function clearMarkers() {
+    Object.values(markers).forEach(marker => map.removeLayer(marker));
+    Object.keys(markers).forEach(key => delete markers[key]);
+}
+
+function renderContainers() {
+    clearMarkers();
+
+    containers.forEach(c => {
+        const marker = L.marker([c.lat,c.lng], {
+            icon:makeIcon(statusColor(c.status))
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <strong>🗑️ ${escapeHTML(c.name)}</strong><br>
+            ${escapeHTML(c.address)}<br>
+            Stanje: <strong>${escapeHTML(c.status)}</strong><br>
+            <button onclick="cycleStatus(${Number(c.id)})">
+                Promijeni stanje
+            </button>
+        `);
+
+        markers["c"+c.id] = marker;
+    });
+
+    const list = document.getElementById("containerList");
+
+    if (!containers.length) {
+        list.innerHTML = '<div class="empty">Nema evidentiranih kontejnera.</div>';
+    } else {
+        list.innerHTML = containers.map(c => `
+            <div class="container-item">
+                <div class="item-top">
+                    <h3 class="item-title">🗑️ ${escapeHTML(c.name)}</h3>
+                    <span class="pill ${statusClass(c.status)}">
+                        ${escapeHTML(c.status)}
+                    </span>
+                </div>
+                <p class="item-desc">📍 ${escapeHTML(c.address)}</p>
+                <label for="status-${Number(c.id)}">Promijeni stanje</label>
+                <select id="status-${Number(c.id)}"
+                    onchange="setStatus(${Number(c.id)},this.value)">
+                    <option ${c.status==="Prazan"?"selected":""}>Prazan</option>
+                    <option ${c.status==="Polupun"?"selected":""}>Polupun</option>
+                    <option ${c.status==="Pun"?"selected":""}>Pun</option>
+                </select>
+                <div class="actions">
+                    <button class="secondary"
+                        onclick="showContainer(${Number(c.id)})">
+                        📍 Na mapi
+                    </button>
+                    <button class="danger"
+                        onclick="deleteContainer(${Number(c.id)})">
+                        Obriši
+                    </button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    updateStats();
+}
+
+function setStatus(id,status) {
+    const c = containers.find(x => x.id === id);
+    if (!c) return;
+    c.status = status;
+    saveData();
+    renderContainers();
+    renderReports();
+}
+
+function cycleStatus(id) {
+    const c = containers.find(x => x.id === id);
+    if (!c) return;
+
+    const states = ["Prazan","Polupun","Pun"];
+    c.status = states[(states.indexOf(c.status)+1)%states.length];
+
+    saveData();
+    renderContainers();
+    renderReports();
+}
+
+function showContainer(id) {
+    const c = containers.find(x => x.id === id);
+    if (!c) return;
+    map.setView([c.lat,c.lng],17);
+    if (markers["c"+id]) markers["c"+id].openPopup();
+}
+
+function deleteContainer(id) {
+    if (!confirm("Obrisati ovaj kontejner?")) return;
+    containers = containers.filter(x => x.id !== id);
+    saveData();
+    renderContainers();
+    renderReports();
+}
+
+function updateStats() {
+    document.getElementById("total").textContent = containers.length;
+    document.getElementById("fullCount").textContent =
+        containers.filter(x => x.status === "Pun").length;
+    document.getElementById("activeCount").textContent =
+        reports.filter(x => !x.solved).length;
+    document.getElementById("solvedCount").textContent =
+        reports.filter(x => x.solved).length;
+}
+
+function renderReports() {
+    reports.forEach(r => {
+        if (markers["r"+r.id]) {
+            map.removeLayer(markers["r"+r.id]);
+            delete markers["r"+r.id];
+        }
+    });
+
+    reports.forEach(r => {
+        if (r.lat == null || r.lng == null) return;
+
+        const marker = L.marker([r.lat,r.lng], {
+            icon:makeIcon("#3878d4")
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <strong>${escapeHTML(r.category)}</strong><br>
+            ${escapeHTML(r.location)}<br>
+            ${escapeHTML(r.description)}<br>
+            Status: ${r.solved ? "Riješeno" : "Aktivno"}
+        `);
+
+        markers["r"+r.id] = marker;
+    });
+
+    const search = document.getElementById("search").value.toLowerCase();
+    const filter = document.getElementById("filter").value;
+
+    const filtered = reports.filter(r => {
+        const searchable = (
+            r.category+" "+r.location+" "+r.description+" "+(r.reporter||"")
+        ).toLowerCase();
+
+        return searchable.includes(search) &&
+            (filter==="all" ||
+            (filter==="active" && !r.solved) ||
+            (filter==="solved" && r.solved));
+    });
+
+    const list = document.getElementById("reportList");
+
+    if (!filtered.length) {
+        list.innerHTML = '<div class="empty">Nema prijava za prikaz.</div>';
+    } else {
+        list.innerHTML = filtered.slice().reverse().map(r => `
+            <div class="report-item">
+                <div class="item-top">
+                    <h3 class="item-title">${escapeHTML(r.category)}</h3>
+                    <span class="pill ${r.solved?"pill-green":"pill-orange"}">
+                        ${r.solved?"Riješeno":"Aktivno"}
+                    </span>
+                </div>
+                <p class="item-desc">
+                    📍 ${escapeHTML(r.location)}<br>
+                    ${escapeHTML(r.description)}<br>
+                    <small>Datum: ${escapeHTML(r.date||"")}
+                    ${r.reporter ? " · Prijavio/la: "+escapeHTML(r.reporter) : ""}
+                    </small>
+                </p>
+                <div class="actions">
+                    ${!r.solved ? `
+                    <button class="secondary"
+                        onclick="markSolved(${Number(r.id)})">
+                        ✓ Označi riješeno
+                    </button>` : ""}
+                    ${r.lat!=null && r.lng!=null ? `
+                    <button class="secondary"
+                        onclick="showReport(${Number(r.id)})">
+                        📍 Na mapi
+                    </button>` : ""}
+                    <button class="danger"
+                        onclick="deleteReport(${Number(r.id)})">
+                        Obriši
+                    </button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    updateStats();
+}
+
+function markSolved(id) {
+    const r = reports.find(x => x.id === id);
+    if (!r) return;
+    r.solved = true;
+    saveData();
+    renderReports();
+}
+
+function deleteReport(id) {
+    if (!confirm("Želiš li obrisati ovu prijavu?")) return;
+    reports = reports.filter(x => x.id !== id);
+    saveData();
+    renderReports();
+}
+
+function showReport(id) {
+    const r = reports.find(x => x.id === id);
+    if (!r || r.lat == null || r.lng == null) return;
+    map.setView([r.lat,r.lng],17);
+    if (markers["r"+id]) markers["r"+id].openPopup();
+}
+
+// ODABIR LOKACIJE ZA PRIJAVU ILI NOVI KONTEJNER
+map.on("click", function(e) {
+    selectedLocation = {
+        lat:e.latlng.lat,
+        lng:e.latlng.lng
+    };
+
+    document.getElementById("coordinates").textContent =
+        "Odabrano: "+selectedLocation.lat.toFixed(5)+
+        ", "+selectedLocation.lng.toFixed(5);
+
+    if (draftMarker) map.removeLayer(draftMarker);
+
+    draftMarker = L.marker(
+        [selectedLocation.lat,selectedLocation.lng],
+        {icon:makeIcon("#7b55c7")}
+    ).addTo(map);
+
+    draftMarker.bindPopup("Odabrana lokacija za novu stavku.").openPopup();
+});
+
+document.getElementById("reportForm").addEventListener("submit",function(e) {
+    e.preventDefault();
+
+    if (!selectedLocation) {
+        alert("Prvo klikni na željenu lokaciju na mapi.");
+        return;
+    }
+
+    const location = document.getElementById("location").value.trim();
+    const description = document.getElementById("description").value.trim();
+
+    if (!location || !description) {
+        alert("Unesi lokaciju i opis problema.");
+        return;
+    }
+
+    reports.push({
+        id:nextId++,
+        category:document.getElementById("category").value,
+        location,
+        description,
+        reporter:document.getElementById("reporter").value.trim(),
+        lat:selectedLocation.lat,
+        lng:selectedLocation.lng,
+        solved:false,
+        date:new Date().toLocaleDateString("bs-BA")
+    });
+
+    saveData();
+    renderReports();
+    this.reset();
+    resetSelectedLocation();
+
+    alert("Prijava je uspješno dodana u ovu demonstracijsku aplikaciju.");
+});
+
+document.getElementById("containerForm").addEventListener("submit",function(e) {
+    e.preventDefault();
+
+    if (!selectedLocation) {
+        alert("Prvo klikni na mapu i odaberi lokaciju kontejnera.");
+        return;
+    }
+
+    const name = document.getElementById("containerName").value.trim();
+    const address = document.getElementById("containerAddress").value.trim();
+
+    if (!name || !address) {
+        alert("Unesi naziv lokacije i adresu.");
+        return;
+    }
+
+    containers.push({
+        id:nextId++,
+        name,
+        address,
+        lat:selectedLocation.lat,
+        lng:selectedLocation.lng,
+        status:document.getElementById("containerStatus").value
+    });
+
+    saveData();
+    renderContainers();
+    renderReports();
+    this.reset();
+    resetSelectedLocation();
+
+    alert("Kontejner je dodan na mapu.");
+});
+
+function resetSelectedLocation() {
+    selectedLocation = null;
+
+    if (draftMarker) {
+        map.removeLayer(draftMarker);
+        draftMarker = null;
+    }
+
+    document.getElementById("coordinates").textContent =
+        "Nije odabrana. Klikni na mapu lijevo.";
+}
+
+document.getElementById("search").addEventListener("input",renderReports);
+document.getElementById("filter").addEventListener("change",renderReports);
+
+function locateMe() {
+    if (!navigator.geolocation) {
+        alert("Preglednik ne podržava lokaciju.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            map.setView([lat,lng],16);
+
+            if (userMarker) map.removeLayer(userMarker);
+
+            userMarker = L.circleMarker([lat,lng],{
+                radius:9,
+                color:"#ffffff",
+                weight:3,
+                fillColor:"#2878df",
+                fillOpacity:1
+            }).addTo(map).bindPopup("Tvoja trenutna lokacija").openPopup();
+        },
+        () => alert("Lokacija nije dostupna. Provjeri dozvole preglednika."),
+        {enableHighAccuracy:true,timeout:10000}
+    );
+}
+
+// POKRETANJE
+renderContainers();
+renderReports();
+</script>
+
+</body>
+</html>
